@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>K-Pop Producer: Global Debut</title>
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Orbitron:wght@700&display=swap" rel="stylesheet">
+
+  <style>
+    body { font-family: 'Montserrat', sans-serif; background-color: #0f172a; color: #e2e8f0; }
+    h1, h2, .neon-text { font-family: 'Orbitron', sans-serif; }
+    
+    /* Neon Glow Effects */
+    .glow-purple { box-shadow: 0 0 15px rgba(168, 85, 247, 0.5); border: 1px solid rgba(168, 85, 247, 0.5); }
+    .glow-pink { box-shadow: 0 0 15px rgba(236, 72, 153, 0.5); border: 1px solid rgba(236, 72, 153, 0.5); }
+    
+    .idol-card {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      background: linear-gradient(145deg, #1e293b, #0f172a);
+    }
+    .idol-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px -5px rgba(236, 72, 153, 0.3); border-color: #ec4899; }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+
+    .fade-in { animation: fadeIn 0.5s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .btn-menu {
+      @apply w-full text-left p-4 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 transition-all flex items-center justify-between group;
+    }
+    
+    /* Stage Lights Animation */
+    .stage-light {
+      position: absolute; width: 100px; height: 100vh;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.1), transparent);
+      transform: rotate(30deg); animation: spotlight 4s infinite alternate; pointer-events: none;
+    }
+    .stage-light:nth-child(2) { right: 20%; transform: rotate(-30deg); animation-delay: 1s; }
+    @keyframes spotlight { from { opacity: 0.3; transform: rotate(20deg); } to { opacity: 0.6; transform: rotate(40deg); } }
+
+    /* Confetti */
+    .confetti { position: fixed; width: 10px; height: 10px; background-color: #f472b6; animation: confetti-fall 2s linear infinite; z-index: 100; }
+    @keyframes confetti-fall { 0% { transform: translateY(-10vh) rotate(0deg); } 100% { transform: translateY(110vh) rotate(360deg); } }
+  </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden relative">
+
+  <!-- Background Effects -->
+  <div class="fixed inset-0 pointer-events-none z-0">
+    <div class="stage-light left-1/4"></div>
+    <div class="stage-light right-1/4"></div>
+  </div>
+
+  <!-- Top Bar -->
+  <header class="bg-slate-900/90 backdrop-blur border-b border-slate-700 p-4 z-20 relative">
+    <div class="max-w-6xl mx-auto flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-pink-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg"><i class="fa-solid fa-music"></i></div>
+        <div>
+          <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-purple-400 tracking-wider">K-PRODUCER</h1>
+          <div class="text-[10px] text-slate-400 uppercase tracking-[0.2em]">Grammar Ent.</div>
+        </div>
+      </div>
+
+      <div class="flex gap-6 text-sm font-bold">
+        <div class="flex flex-col items-end">
+          <span class="text-slate-500 text-[10px] uppercase">Fandom (Fans)</span>
+          <span class="text-pink-400 text-lg" id="statFans">0</span>
+        </div>
+        <div class="flex flex-col items-end">
+          <span class="text-slate-500 text-[10px] uppercase">Budget (₩)</span>
+          <span class="text-emerald-400 text-lg" id="statMoney">₩1,000</span>
+        </div>
+        <div class="flex flex-col items-end">
+          <span class="text-slate-500 text-[10px] uppercase">Chart Rank</span>
+          <span class="text-yellow-400 text-lg" id="statRank">#999</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 flex max-w-6xl mx-auto w-full z-10 p-4 gap-6 overflow-hidden">
+    
+    <!-- LEFT: Dashboard Navigation -->
+    <aside class="w-64 flex flex-col gap-3">
+      <div class="bg-slate-800/80 p-4 rounded-xl border border-slate-700">
+        <h2 class="text-slate-400 text-xs font-bold uppercase mb-3 tracking-wider">Management</h2>
+        
+        <button onclick="game.navigate('dashboard')" class="btn-menu mb-2 border-l-4 border-l-pink-500">
+          <span class="font-bold text-white"><i class="fa-solid fa-users mr-2 text-pink-500"></i> My Group</span>
+        </button>
+
+        <button onclick="game.startActivity('studio')" class="btn-menu mb-2">
+          <div>
+            <div class="font-bold text-white"><i class="fa-solid fa-microphone-lines mr-2 text-purple-400"></i> Studio</div>
+            <div class="text-[10px] text-slate-400 mt-1">Fix English Lyrics</div>
+          </div>
+          <span class="text-xs bg-purple-900 text-purple-300 px-2 py-1 rounded">SVA</span>
+        </button>
+
+        <button onclick="game.startActivity('press')" class="btn-menu mb-2">
+          <div>
+            <div class="font-bold text-white"><i class="fa-solid fa-newspaper mr-2 text-blue-400"></i> Press Con</div>
+            <div class="text-[10px] text-slate-400 mt-1">Handle Reporters</div>
+          </div>
+          <span class="text-xs bg-blue-900 text-blue-300 px-2 py-1 rounded">Quantifiers</span>
+        </button>
+
+        <button onclick="game.startActivity('diary')" class="btn-menu mb-2">
+          <div>
+            <div class="font-bold text-white"><i class="fa-solid fa-book-open mr-2 text-amber-400"></i> Trainee Logs</div>
+            <div class="text-[10px] text-slate-400 mt-1">Edit Backstories</div>
+          </div>
+          <span class="text-xs bg-amber-900 text-amber-300 px-2 py-1 rounded">Past Tense</span>
+        </button>
+
+        <button onclick="game.startActivity('social')" class="btn-menu">
+          <div>
+            <div class="font-bold text-white"><i class="fa-solid fa-hashtag mr-2 text-pink-400"></i> Social Media</div>
+            <div class="text-[10px] text-slate-400 mt-1">Catch Typos</div>
+          </div>
+          <span class="text-xs bg-pink-900 text-pink-300 px-2 py-1 rounded">Spelling</span>
+        </button>
+      </div>
+
+      <!-- Action Log -->
+      <div class="flex-1 bg-slate-900 rounded-xl p-4 border border-slate-800 overflow-y-auto font-mono text-xs">
+        <div class="text-slate-500 mb-2 border-b border-slate-800 pb-1">AGENCY LOG</div>
+        <div id="gameLog" class="space-y-2">
+          <div class="text-pink-500">> Agency initialized.</div>
+          <div class="text-slate-400">> Recruit idols to debut.</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- RIGHT: Main Interaction Screen -->
+    <section class="flex-1 bg-slate-800/50 backdrop-blur rounded-2xl border border-slate-700 overflow-hidden relative" id="mainScreen">
+      <!-- Dynamic Content Injection -->
+    </section>
+
+  </main>
+
+  <!-- Naming Modal -->
+  <div id="namingModal" class="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4 backdrop-blur-lg">
+    <div class="bg-slate-900 border border-pink-500 w-full max-w-md rounded-2xl overflow-hidden shadow-2xl glow-pink text-center p-8 fade-in">
+        <div class="text-6xl text-pink-500 mb-6"><i class="fa-solid fa-crown"></i></div>
+        <h2 class="text-3xl font-bold text-white mb-2">DEBUT SHOWCASE</h2>
+        <p class="text-slate-400 mb-6">Welcome to the industry. Please register your agency details.</p>
+        
+        <div class="text-left text-xs font-bold text-slate-500 mb-1 ml-1">YOUR NAME (PRODUCER)</div>
+        <input type="text" id="producerNameInput" class="w-full bg-slate-800 border border-slate-600 rounded-lg p-3 text-white text-lg font-bold mb-4 focus:border-pink-500 focus:outline-none" placeholder="e.g. Sarah" autocomplete="off">
+
+        <div class="text-left text-xs font-bold text-slate-500 mb-1 ml-1">GROUP NAME</div>
+        <input type="text" id="groupNameInput" class="w-full bg-slate-800 border border-slate-600 rounded-lg p-3 text-white text-lg font-bold mb-6 focus:border-pink-500 focus:outline-none" placeholder="e.g. BLACKPINK" autocomplete="off">
+        
+        <button onclick="game.setupAgency()" class="w-full py-3 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold rounded-lg transition-all shadow-lg">CONFIRM DEBUT</button>
+    </div>
+  </div>
+
+  <!-- Win Modal -->
+  <div id="winModal" class="fixed inset-0 bg-black/90 z-50 hidden flex items-center justify-center p-4 backdrop-blur-md">
+    <div class="bg-gradient-to-br from-purple-900 to-pink-900 w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl glow-pink text-center p-10 fade-in border-2 border-pink-400">
+        <div class="text-7xl mb-4 animate-bounce">🏆</div>
+        <h2 class="text-4xl font-bold text-white mb-2 tracking-widest">GLOBAL DEBUT!</h2>
+        <p class="text-pink-200 mb-8 text-lg">Congratulations Producer! Your group has hit 10,000 fans and topped the charts.</p>
+        
+        <div class="bg-black/30 p-6 rounded-xl mb-8 backdrop-blur">
+            <p class="text-sm text-slate-300 uppercase tracking-widest">Final Rank</p>
+            <div class="text-5xl font-bold text-yellow-400 mt-2">#1</div>
+        </div>
+
+        <button onclick="location.reload()" class="px-8 py-3 bg-white text-pink-600 font-bold rounded-full hover:bg-slate-200 transition-all shadow-lg">Start New Group</button>
+    </div>
+  </div>
+
+  <!-- Overlay Modal for Games -->
+  <div id="gameModal" class="fixed inset-0 bg-black/90 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-slate-900 border border-slate-600 w-full max-w-2xl rounded-2xl overflow-hidden shadow-2xl glow-purple relative fade-in">
+      
+      <!-- Modal Header -->
+      <div class="bg-slate-800 p-4 border-b border-slate-700 flex justify-between items-center">
+        <h3 class="text-xl font-bold text-white tracking-widest uppercase" id="modalTitle">Production Studio</h3>
+        <button onclick="game.closeModal()" class="text-slate-400 hover:text-white transition-colors"><i class="fa-solid fa-xmark text-xl"></i></button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-8">
+        <div id="modalContent">
+          <!-- Question/Interaction goes here -->
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="bg-slate-950 p-4 text-center text-xs text-slate-500">
+        GRAMMAR ENTERTAINMENT SYSTEM v2.0
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ================= DATA: IDOLS ================= */
+    const idols = [
+      { name: "Luna", role: "Vocal", trait: "Charming", img: "fa-star" },
+      { name: "Jin", role: "Rapper", trait: "Cool", img: "fa-bolt" },
+      { name: "Minji", role: "Dancer", trait: "Energetic", img: "fa-fire" },
+      { name: "Sora", role: "Leader", trait: "Smart", img: "fa-crown" }
+    ];
+
+    /* ================= DATA: GRAMMAR QUESTS ================= */
+    const quests = {
+      studio: [ // Subject-Verb Agreement & Plurals
+        { context: "Lyric Check: 'My Heart Beat'", q: "Everyone in the crowd _____ my name.", options: [{t: "scream", correct: false}, {t: "screams", correct: true}], note: "'Everyone' is an indefinite pronoun and is technically singular." },
+        { context: "Lyric Check: 'Dreamer'", q: "Neither you nor I _____ ready for this love.", options: [{t: "am", correct: true}, {t: "are", correct: false}, {t: "is", correct: false}], note: "Proximity Rule: With 'neither/nor', the verb agrees with the subject closest to it ('I')." },
+        { context: "Lyric Check: 'City Lights'", q: "The group of dancers _____ perfectly.", options: [{t: "move", correct: false}, {t: "moves", correct: true}], note: "The subject is 'group' (singular collective noun), not 'dancers'." },
+        { context: "Lyric Check: 'Forever'", q: "Ten years _____ a long time to wait.", options: [{t: "is", correct: true}, {t: "are", correct: false}], note: "Time periods (Ten years) are treated as a singular unit." },
+        { context: "Lyric Check: 'Bad Boy'", q: "One of the boys _____ lying.", options: [{t: "are", correct: false}, {t: "is", correct: true}], note: "Subject is 'One', not 'boys'." },
+        { context: "Lyric Check: 'Shine'", q: "The news _____ shocking.", options: [{t: "was", correct: true}, {t: "were", correct: false}], note: "'News' looks plural but is always singular." },
+        { context: "Lyric Check: 'Money'", q: "Mathematics _____ my favorite subject.", options: [{t: "are", correct: false}, {t: "is", correct: true}], note: "Fields of study ending in 's' (Physics, Mathematics) are singular." },
+        { context: "Lyric Check: 'Together'", q: "Bread and butter _____ my daily meal.", options: [{t: "is", correct: true}, {t: "are", correct: false}], note: "Compound subjects treated as a single unit take a singular verb." },
+        { context: "Lyric Check: 'Run'", q: "The police _____ chasing us.", options: [{t: "is", correct: false}, {t: "are", correct: true}], note: "'Police' is always a plural noun in English." },
+        { context: "Lyric Check: 'Style'", q: "These scissors _____ sharp.", options: [{t: "is", correct: false}, {t: "are", correct: true}], note: "Tools with two parts (scissors, glasses) are plural." },
+        { context: "Lyric Check: 'Alone'", q: "Someone _____ waiting for you.", options: [{t: "is", correct: true}, {t: "are", correct: false}], note: "'Someone' is singular." },
+        { context: "Lyric Check: 'Galaxy'", q: "A number of fans _____ outside.", options: [{t: "is", correct: false}, {t: "are", correct: true}], note: "'A number of' takes a plural verb. 'The number of' takes a singular verb." },
+        { context: "Lyric Check: 'Destiny'", q: "The number of fans _____ growing.", options: [{t: "is", correct: true}, {t: "are", correct: false}], note: "'The number of' is singular." },
+        { context: "Lyric Check: 'Rain'", q: "Either the manager or the idols _____ late.", options: [{t: "is", correct: false}, {t: "are", correct: true}], note: "Proximity Rule: 'Idols' is plural and closer to the verb." },
+        { context: "Lyric Check: 'Silence'", q: "My family _____ very supportive.", options: [{t: "is", correct: true}, {t: "are", correct: false}], note: "Collective nouns (Family) are usually singular unless members act individually." }
+      ],
+      press: [ // Quantifiers & SVA
+        { context: "Reporter: 'Are the rumors true?'", q: "You answer: '_____ the rumors are true.'", options: [{t: "None of", correct: true}, {t: "Every of", correct: false}], note: "'None of' works with plural noun 'rumors'. 'Every' cannot be followed directly by 'of'." },
+        { context: "Reporter: 'Is the album ready?'", q: "You answer: '_____ song has been produced with care.'", options: [{t: "All", correct: false}, {t: "Each", correct: true}], note: "'Song' is singular. 'All' requires plural (songs)." },
+        { context: "Reporter: 'How are the members?'", q: "You answer: '_____ the members is tired.'", options: [{t: "None of", correct: true}, {t: "No one", correct: false}], note: "'None of' is preferred here." },
+        { context: "Reporter: 'Who wrote the lyrics?'", q: "You answer: '_____ Jin nor Luna wrote this.'", options: [{t: "Either", correct: false}, {t: "Neither", correct: true}], note: "'Neither' pairs with 'nor'." },
+        { context: "Reporter: 'Is there merchandise?'", q: "You answer: 'There _____ a lot of merchandise.'", options: [{t: "is", correct: true}, {t: "are", correct: false}], note: "'Merchandise' is uncountable." },
+        { context: "Reporter: 'Do you have many fans?'", q: "You answer: 'We have _____ fans in Asia.'", options: [{t: "much", correct: false}, {t: "many", correct: true}], note: "'Fans' are countable, so use 'many'." },
+        { context: "Reporter: 'Do you have time?'", q: "You answer: 'We have _____ time before the show.'", options: [{t: "a few", correct: false}, {t: "a little", correct: true}], note: "'Time' is uncountable, so use 'a little'." },
+        { context: "Reporter: 'Did you sell tickets?'", q: "You answer: '_____ tickets were sold out.'", options: [{t: "All", correct: false}, {t: "All the", correct: true}], note: "Use 'All the' or 'All of the' before specific nouns." },
+        { context: "Reporter: 'Any problems?'", q: "You answer: 'We had _____ trouble with the sound.'", options: [{t: "many", correct: false}, {t: "much", correct: true}], note: "'Trouble' is uncountable." },
+        { context: "Reporter: 'Who is the best?'", q: "You answer: '_____ of them are talented.'", options: [{t: "Both", correct: true}, {t: "Every", correct: false}], note: "'Both' refers to two and is plural." },
+        { context: "Reporter: 'Did you eat?'", q: "You answer: 'We didn't eat _____ food yet.'", options: [{t: "some", correct: false}, {t: "any", correct: true}], note: "Use 'any' in negative sentences." },
+        { context: "Reporter: 'Is the venue full?'", q: "You answer: 'There are _____ empty seats.'", options: [{t: "few", correct: true}, {t: "little", correct: false}], note: "'Seats' are countable." },
+        { context: "Reporter: 'How much work was it?'", q: "You answer: 'It took a great _____ of effort.'", options: [{t: "deal", correct: true}, {t: "number", correct: false}], note: "'A great deal of' is for uncountable nouns (effort)." }
+      ],
+      diary: [ // Past Tense & Irregulars
+        { context: "Editing Minji's Diary", q: "'Yesterday, I _____ the dance perfectly.'", options: [{t: "choosed", correct: false}, {t: "chose", correct: true}], note: "Past of 'choose' is 'chose'." },
+        { context: "Editing Sora's Bio", q: "'She _____ the leader last year.'", options: [{t: "become", correct: false}, {t: "became", correct: true}], note: "Past of 'become' is 'became'." },
+        { context: "Editing Agency History", q: "'We _____ a huge risk.'", options: [{t: "took", correct: true}, {t: "taked", correct: false}], note: "Past of 'take' is 'took'." },
+        { context: "Editing Press Release", q: "'The video _____ viral.'", options: [{t: "went", correct: true}, {t: "goed", correct: false}], note: "Past of 'go' is 'went'." },
+        { context: "Editing Jin's Blog", q: "'I _____ a new song.'", options: [{t: "writed", correct: false}, {t: "wrote", correct: true}], note: "Past of 'write' is 'wrote'." },
+        { context: "Editing Tour Log", q: "'We _____ to Paris.'", options: [{t: "flew", correct: true}, {t: "flied", correct: false}], note: "Past of 'fly' is 'flew'." },
+        { context: "Editing Vlog Caption", q: "'Luna _____ a cold.'", options: [{t: "catched", correct: false}, {t: "caught", correct: true}], note: "Past of 'catch' is 'caught'." },
+        { context: "Editing History", q: "'We _____ the contest.'", options: [{t: "won", correct: true}, {t: "winned", correct: false}], note: "Past of 'win' is 'won'." },
+        { context: "Editing Interview", q: "'I _____ happy.'", options: [{t: "felt", correct: true}, {t: "feeled", correct: false}], note: "Past of 'feel' is 'felt'." },
+        { context: "Editing Photo Caption", q: "'We _____ bubble tea.'", options: [{t: "drank", correct: true}, {t: "drunk", correct: false}], note: "Simple past is 'drank'. 'Drunk' is the participle." },
+        { context: "Editing Memories", q: "'We _____ all night.'", options: [{t: "sang", correct: true}, {t: "sung", correct: false}], note: "Simple past is 'sang'." },
+        { context: "Editing Profile", q: "'She _____ English well.'", options: [{t: "spoke", correct: true}, {t: "speaked", correct: false}], note: "Past of 'speak' is 'spoke'." }
+      ],
+      social: [ // Spelling Focus
+        { context: "Twitter Update", q: "Find the error: 'We are _____ for your support!'", options: [{t: "greatful", correct: false}, {t: "grateful", correct: true}], note: "It is 'Grateful' (from gratitude), not 'great'." },
+        { context: "Instagram Caption", q: "Find the error: 'I will _____ see you soon.'", options: [{t: "definitely", correct: true}, {t: "definately", correct: false}], note: "Remember: 'Finite' is in De-finite-ly." },
+        { context: "Fan Reply", q: "Find the error: 'We want to _____ everyone.'", options: [{t: "accommodate", correct: true}, {t: "accomodate", correct: false}], note: "Accommodate has two Cs and two Ms." },
+        { context: "Weverse Post", q: "Find the error: 'I _____ your letter.'", options: [{t: "recieved", correct: false}, {t: "received", correct: true}], note: "Rule: 'I before E except after C'." },
+        { context: "YouTube Title", q: "Find the error: 'Our _____ rooms.'", options: [{t: "seperate", correct: false}, {t: "separate", correct: true}], note: "There is 'a rat' in sep-a-rate." },
+        { context: "Official Statement", q: "Find the error: 'It was an _____.'", options: [{t: "occurence", correct: false}, {t: "occurrence", correct: true}], note: "Occurrence has two Cs and two Rs." },
+        { context: "Bubble Message", q: "Find the error: 'It was _____.'", options: [{t: "weird", correct: true}, {t: "wierd", correct: false}], note: "'Weird' is a weird word; it breaks the 'I before E' rule." },
+        { context: "TikTok Text", q: "Find the error: 'Don't _____ me!'", options: [{t: "embarrass", correct: true}, {t: "embarass", correct: false}], note: "Embarrass has two Rs and two Ss." },
+        { context: "Merch Store", q: "Find the error: 'Wait _____ the end.'", options: [{t: "until", correct: true}, {t: "untill", correct: false}], note: "'Until' only has one L." },
+        { context: "Concert Sign", q: "Find the error: 'See you _____.'", options: [{t: "tommorow", correct: false}, {t: "tomorrow", correct: true}], note: "Tomorrow: One M, two Rs." },
+        { context: "Lyric Video", q: "Find the error: 'The _____ is bright.'", options: [{t: "beginning", correct: true}, {t: "begining", correct: false}], note: "Double N in beginning." },
+        { context: "Vlog Title", q: "Find the error: 'My _____ routine.'", options: [{t: "schedule", correct: true}, {t: "schedual", correct: false}], note: "Schedule. Think 'School'." },
+        { context: "Postcard", q: "Find the error: 'We are _____.'", options: [{t: "truly", correct: true}, {t: "truely", correct: false}], note: "No E in truly." },
+        { context: "Banner", q: "Find the error: '_____ knowledge.'", options: [{t: "Public", correct: true}, {t: "Puplic", correct: false}], note: "Public with a B." },
+        { context: "Hashtag", q: "Find the error: '#_____'", options: [{t: "Success", correct: true}, {t: "Sucess", correct: false}], note: "Double C, Double S." }
+      ]
+    };
+
+    /* ================= GAME ENGINE ================= */
+    const state = {
+      groupName: "GLITTER",
+      producerName: "Producer",
+      fans: 0,
+      money: 1000,
+      rank: 999,
+      level: 1,
+      currentQuest: null,
+      questCategory: null,
+      screen: 'dashboard'
+    };
+
+    const game = {
+      init: () => {
+        // Show Naming Modal first
+        document.getElementById('namingModal').classList.remove('hidden');
+      },
+
+      setupAgency: () => {
+        const pName = document.getElementById('producerNameInput').value.trim();
+        const gName = document.getElementById('groupNameInput').value.trim();
+        
+        if (pName) state.producerName = pName;
+        if (gName) state.groupName = gName;
+        
+        document.getElementById('namingModal').classList.add('hidden');
+        game.navigate('dashboard');
+        game.updateStats();
+        game.log(`Agency initialized. CEO: ${state.producerName}`, 'neutral');
+      },
+
+      log: (msg, type) => {
+        const color = type === 'win' ? 'text-emerald-400' : type === 'fail' ? 'text-pink-500' : 'text-slate-400';
+        const el = document.getElementById('gameLog');
+        el.innerHTML = `<div class="${color} fade-in">> ${msg}</div>` + el.innerHTML;
+      },
+
+      updateStats: () => {
+        document.getElementById('statFans').innerText = state.fans.toLocaleString();
+        document.getElementById('statMoney').innerText = "₩" + state.money.toLocaleString();
+        document.getElementById('statRank').innerText = state.rank <= 1 ? "#1 (Global Star)" : "#" + state.rank;
+      },
+
+      navigate: (screen) => {
+        state.screen = screen;
+        const main = document.getElementById('mainScreen');
+        main.innerHTML = ''; 
+
+        if (screen === 'dashboard') {
+          let html = `
+            <div class="p-8 h-full flex flex-col fade-in">
+              <h2 class="text-2xl font-bold text-white mb-2">Producer <span class="text-emerald-400">${state.producerName}</span></h2>
+              <h3 class="text-xl text-slate-400 mb-6">Managing: <span class="text-pink-500 text-3xl ml-2 tracking-widest font-bold">${state.groupName}</span></h3>
+              
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+          `;
+          
+          idols.forEach(idol => {
+            html += `
+              <div class="idol-card rounded-2xl p-6 text-center relative overflow-hidden group">
+                <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black/60 opacity-50"></div>
+                <div class="relative z-10">
+                  <div class="w-16 h-16 mx-auto rounded-full bg-slate-800 flex items-center justify-center text-3xl text-pink-400 mb-3 border-2 border-pink-500/30 group-hover:border-pink-500 transition-colors">
+                    <i class="fa-solid ${idol.img}"></i>
+                  </div>
+                  <h3 class="text-xl font-bold text-white">${idol.name}</h3>
+                  <p class="text-xs text-slate-400 uppercase tracking-widest mt-1">${idol.role}</p>
+                  <div class="mt-4 text-xs bg-slate-800/80 py-1 px-2 rounded text-emerald-400 inline-block">${idol.trait}</div>
+                </div>
+              </div>
+            `;
+          });
+
+          html += `</div>
+            <div class="mt-8 bg-slate-900/50 p-6 rounded-xl border border-slate-700">
+              <h3 class="text-lg font-bold text-slate-300 mb-2">Producer Status</h3>
+              <div class="w-full bg-slate-700 h-2 rounded-full overflow-hidden relative">
+                <div class="bg-gradient-to-r from-pink-500 to-purple-500 h-full transition-all duration-1000 ease-out" style="width: ${(state.fans/10000)*100}%"></div>
+              </div>
+              <p class="text-xs text-slate-500 mt-2 flex justify-between">
+                <span>Current Fandom: ${state.fans.toLocaleString()}</span>
+                <span>Global Debut Goal: 10,000</span>
+              </p>
+            </div>
+          </div>`;
+          main.innerHTML = html;
+        }
+      },
+
+      startActivity: (type) => {
+        const pool = quests[type];
+        const q = pool[Math.floor(Math.random() * pool.length)];
+        state.currentQuest = q;
+        state.questCategory = type;
+
+        let title = "";
+        let icon = "";
+        if (type === 'studio') { title = "Recording Studio"; icon = "fa-microphone"; }
+        if (type === 'press') { title = "Press Conference"; icon = "fa-camera-flash"; }
+        if (type === 'diary') { title = "Trainee Archives"; icon = "fa-book"; }
+        if (type === 'social') { title = "Social Media Feed"; icon = "fa-hashtag"; }
+
+        document.getElementById('modalTitle').innerHTML = `<i class="fa-solid ${icon} mr-2"></i> ${title}`;
+        
+        let html = `
+          <div class="mb-6">
+            <div class="text-xs uppercase tracking-widest text-slate-500 mb-2">${q.context}</div>
+            <div class="text-xl font-bold text-white leading-relaxed">${q.q.replace('_____', '<span class="text-pink-500 border-b-2 border-pink-500 px-2">?</span>')}</div>
+          </div>
+          <div class="grid grid-cols-1 gap-3">
+        `;
+
+        // Shuffle options
+        const opts = [...q.options].sort(() => Math.random() - 0.5);
+
+        opts.forEach(opt => {
+          html += `<button onclick="game.submitAnswer('${opt.t.replace(/'/g, "\\'")}', ${opt.correct})" 
+            class="p-4 rounded-lg bg-slate-800 border border-slate-600 hover:bg-slate-700 hover:border-pink-500 text-left transition-all text-slate-200 font-bold">
+            ${opt.t}
+          </button>`;
+        });
+
+        html += `</div>`;
+        document.getElementById('modalContent').innerHTML = html;
+        document.getElementById('gameModal').classList.remove('hidden');
+      },
+
+      submitAnswer: (text, isCorrect) => {
+        const modal = document.getElementById('modalContent');
+        if (isCorrect) {
+          // Reward logic
+          const money = 500;
+          const fans = 200; // ~50 questions to win (45-60 mins)
+          state.money += money;
+          state.fans += fans;
+          if(state.rank > 1) state.rank -= Math.floor(Math.random() * 10) + 1;
+          if(state.rank < 1) state.rank = 1;
+          
+          game.updateStats();
+          game.log(`${state.questCategory.toUpperCase()} Success! +${fans} Fans`, 'win');
+
+          // Win Check
+          if(state.fans >= 10000) {
+             game.closeModal();
+             game.triggerWin();
+             return;
+          }
+
+          // If dashboard is active, re-render to show progress bar update
+          if(state.screen === 'dashboard') {
+             game.navigate('dashboard');
+          }
+
+          modal.innerHTML = `
+            <div class="text-center py-8">
+              <div class="text-6xl text-emerald-400 mb-4 animate-bounce"><i class="fa-solid fa-check-circle"></i></div>
+              <h2 class="text-2xl font-bold text-white mb-2">Perfect All-Kill!</h2>
+              <p class="text-slate-400 mb-6">${state.currentQuest.note}</p>
+              <button onclick="game.closeModal()" class="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full font-bold shadow-lg transition-transform hover:scale-105">Next Schedule</button>
+            </div>
+          `;
+        } else {
+          state.rank += 5;
+          game.updateStats();
+          game.log(`Correction needed. Netizens noticed.`, 'fail');
+
+          modal.innerHTML = `
+            <div class="text-center py-8">
+              <div class="text-6xl text-pink-500 mb-4 animate-pulse"><i class="fa-solid fa-triangle-exclamation"></i></div>
+              <h2 class="text-2xl font-bold text-white mb-2">Typo / Error!</h2>
+              <p class="text-slate-400 mb-2">That wasn't quite right.</p>
+              <div class="bg-slate-800 p-3 rounded mb-6 text-sm text-pink-300 border border-slate-700">
+                <i class="fa-solid fa-circle-info mr-2"></i> ${state.currentQuest.note}
+              </div>
+              <button onclick="game.closeModal()" class="px-6 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-full font-bold">Try Again</button>
+            </div>
+          `;
+        }
+      },
+
+      triggerWin: () => {
+        // Confetti
+        for(let i=0; i<50; i++) {
+            let conf = document.createElement('div');
+            conf.className = 'confetti';
+            conf.style.left = Math.random() * 100 + 'vw';
+            conf.style.animationDuration = (Math.random() * 3 + 2) + 's';
+            conf.style.backgroundColor = ['#f472b6', '#a855f7', '#34d399', '#facc15'][Math.floor(Math.random()*4)];
+            document.body.appendChild(conf);
+        }
+        document.getElementById('winModal').classList.remove('hidden');
+      },
+
+      closeModal: () => {
+        document.getElementById('gameModal').classList.add('hidden');
+      }
+    };
+
+    // Start
+    game.init();
+
+  </script>
+</body>
+</html>
